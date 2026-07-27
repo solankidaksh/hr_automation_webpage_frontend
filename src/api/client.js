@@ -1,13 +1,45 @@
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
+const AUTH_TOKEN_KEY = "hr_auth_token";
+
+export function captureAuthTokenFromHash() {
+  const hash = window.location.hash.startsWith("#")
+    ? window.location.hash.slice(1)
+    : window.location.hash;
+  if (!hash) return false;
+
+  const params = new URLSearchParams(hash);
+  const token = params.get("auth_token");
+  if (!token) return false;
+
+  sessionStorage.setItem(AUTH_TOKEN_KEY, token);
+  window.history.replaceState({}, "", window.location.pathname + window.location.search);
+  return true;
+}
+
+export function clearAuthToken() {
+  sessionStorage.removeItem(AUTH_TOKEN_KEY);
+}
+
+function getAuthToken() {
+  return sessionStorage.getItem(AUTH_TOKEN_KEY) || "";
+}
 
 async function request(path, options = {}) {
+  const headers = { ...options.headers };
+  const hasBody = options.body !== undefined && options.body !== null;
+  if (hasBody && !(options.body instanceof FormData) && !headers["Content-Type"]) {
+    headers["Content-Type"] = "application/json";
+  }
+
+  const token = getAuthToken();
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
   const res = await fetch(`${API_BASE}${path}`, {
     credentials: "include",
     ...options,
-    headers: {
-      ...(options.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
-      ...options.headers,
-    },
+    headers,
   });
 
   let data = null;

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { api } from "./api/client";
+import { api, captureAuthTokenFromHash, clearAuthToken } from "./api/client";
 import LoginButton from "./components/LoginButton";
 import TemplateUpload from "./components/TemplateUpload";
 import SheetSelector from "./components/SheetSelector";
@@ -24,6 +24,9 @@ export default function App() {
   const pollRef = useRef(null);
 
   useEffect(() => {
+    // OAuth callback redirects here with #auth_token=... (cross-origin session handoff)
+    captureAuthTokenFromHash();
+
     const params = new URLSearchParams(window.location.search);
     const err = params.get("auth_error");
     if (err) {
@@ -58,6 +61,7 @@ export default function App() {
   }, []);
 
   async function handleLogout() {
+    clearAuthToken();
     await api.logout();
     setUser(null);
     setTemplate(null);
