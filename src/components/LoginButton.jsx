@@ -1,3 +1,5 @@
+import { api } from "../api/client";
+
 export default function LoginButton({ user, onLogout, loading }) {
   if (loading) {
     return <span className="muted">Checking session…</span>;
@@ -16,7 +18,7 @@ export default function LoginButton({ user, onLogout, loading }) {
   }
 
   return (
-    <a className="btn btn-google" href="/api/auth/login">
+    <a className="btn btn-google" href={api.loginUrl()}>
       <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
         <path
           fill="#FFC107"

@@ -1,4 +1,4 @@
-const API_BASE = "";
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
 
 async function request(path, options = {}) {
   const res = await fetch(`${API_BASE}${path}`, {
@@ -38,9 +38,10 @@ async function request(path, options = {}) {
 }
 
 export const api = {
+  baseUrl: API_BASE,
   me: () => request("/api/auth/me"),
   logout: () => request("/api/auth/logout", { method: "POST" }),
-  loginUrl: () => "/api/auth/login",
+  loginUrl: () => `${API_BASE}/api/auth/login`,
 
   uploadTemplate: (file) => {
     const form = new FormData();

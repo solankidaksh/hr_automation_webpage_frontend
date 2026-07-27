@@ -156,7 +156,7 @@ export default function App() {
         </p>
         {!user && !authLoading ? (
           <div className="hero-actions">
-            <a className="btn btn-primary" href="/api/auth/login">
+            <a className="btn btn-primary" href={api.loginUrl()}>
               Sign in with Google
             </a>
           </div>
