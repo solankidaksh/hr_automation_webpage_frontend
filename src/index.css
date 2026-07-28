@@ -196,7 +196,8 @@ a {
 }
 
 .field input[type="text"],
-.field input[type="url"] {
+.field input[type="url"],
+.field select {
   width: 100%;
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.72);
@@ -205,7 +206,8 @@ a {
   outline: none;
 }
 
-.field input:focus {
+.field input:focus,
+.field select:focus {
   border-color: var(--teal);
   box-shadow: 0 0 0 3px rgba(15, 107, 92, 0.12);
 }

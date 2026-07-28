@@ -17,6 +17,9 @@ export default function App() {
   const [driveFolder, setDriveFolder] = useState("");
   const [folderPreview, setFolderPreview] = useState(null);
   const [skipIfExists, setSkipIfExists] = useState(true);
+  const [nameField1, setNameField1] = useState("");
+  const [nameField2, setNameField2] = useState("");
+  const [nameSuffix, setNameSuffix] = useState("");
   const [starting, setStarting] = useState(false);
   const [job, setJob] = useState(null);
   const [jobError, setJobError] = useState("");
@@ -104,6 +107,9 @@ export default function App() {
         skip_if_exists: skipIfExists,
         drive_folder: driveFolder.trim(),
         drive_folder_id: folderPreview?.folder_id || undefined,
+        name_field_1: nameField1,
+        name_field_2: nameField2,
+        name_suffix: nameSuffix.trim(),
       });
       setJob({
         job_id: started.job_id,
@@ -126,12 +132,17 @@ export default function App() {
     }
   }
 
+  const sheetHeaders = preview?.headers || validation?.headers || [];
+
   const canGenerate =
     Boolean(user) &&
     Boolean(template) &&
     Boolean(sheet.trim()) &&
     Boolean(validation?.ok) &&
     Boolean(folderPreview?.folder_id) &&
+    Boolean(nameField1) &&
+    Boolean(nameField2) &&
+    Boolean(nameSuffix.trim()) &&
     !(preview && preview.row_count > 1000);
 
   let disabledReason = "";
@@ -141,6 +152,8 @@ export default function App() {
   else if (!validation.ok) disabledReason = "Fix missing columns, then validate again.";
   else if (!folderPreview?.folder_id) {
     disabledReason = "Paste a Drive folder link and click Verify folder.";
+  } else if (!nameField1 || !nameField2 || !nameSuffix.trim()) {
+    disabledReason = "Choose two sheet columns and enter a letter title for PDF names.";
   } else if (preview && preview.row_count > 1000) {
     disabledReason = `This sheet has ${preview.row_count} rows. Max 1000 letters per generate. Split the sheet and try again.`;
   }
@@ -193,6 +206,8 @@ export default function App() {
               setSheet(v);
               setPreview(null);
               setValidation(null);
+              setNameField1("");
+              setNameField2("");
             }}
             preview={preview}
             validation={validation}
@@ -216,6 +231,13 @@ export default function App() {
             onGenerate={handleGenerate}
             disabledReason={disabledReason}
             driveFolderName={folderPreview?.name}
+            headers={sheetHeaders}
+            nameField1={nameField1}
+            nameField2={nameField2}
+            nameSuffix={nameSuffix}
+            onNameField1Change={setNameField1}
+            onNameField2Change={setNameField2}
+            onNameSuffixChange={setNameSuffix}
           />
 
           <ProgressReport job={job} error={jobError} />
