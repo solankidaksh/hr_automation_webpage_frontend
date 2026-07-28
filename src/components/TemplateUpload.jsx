@@ -2,21 +2,23 @@ import { useState } from "react";
 import { api } from "../api/client";
 
 export default function TemplateUpload({ template, onUploaded, onRemoved, disabled }) {
+  const [link, setLink] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
-  async function handleChange(e) {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
+  async function handleUseTemplate() {
+    if (!link.trim()) {
+      setError("Paste a Google Drive .docx or Google Docs URL");
+      return;
+    }
 
     setBusy(true);
     setError("");
     try {
-      const uploaded = await api.uploadTemplate(file);
-      onUploaded(uploaded);
+      const loaded = await api.fromDriveTemplate(link.trim());
+      onUploaded(loaded);
     } catch (err) {
-      setError(err.message || "Upload failed");
+      setError(err.message || "Could not load template from Drive");
     } finally {
       setBusy(false);
     }
@@ -42,22 +44,32 @@ export default function TemplateUpload({ template, onUploaded, onRemoved, disabl
     <section className="section">
       <h2>Letter template</h2>
       <p className="lede">
-        Upload a .docx with placeholders like {"{{name}}"}, {"{{department}}"},{" "}
-        {"{{emp_no}}"}. Use one word only inside the braces (underscores OK) — not{" "}
-        {"{{emp no}}"}.
+        Paste a Google Drive <strong>.docx</strong> or <strong>Google Docs</strong> link with
+        placeholders like {"{{name}}"}, {"{{department}}"}, {"{{emp_no}}"}. Use one word only
+        inside the braces (underscores OK) — not {"{{emp no}}"}.
       </p>
 
+      <div className="field">
+        <label htmlFor="template-drive-link">Google Drive / Docs URL or ID</label>
+        <input
+          id="template-drive-link"
+          type="url"
+          placeholder="https://drive.google.com/file/d/… or https://docs.google.com/document/d/…"
+          value={link}
+          disabled={disabled || busy}
+          onChange={(e) => setLink(e.target.value)}
+        />
+      </div>
+
       <div className="file-row">
-        <label className="btn btn-ghost">
-          {busy ? "Working…" : template ? "Replace DOCX" : "Choose DOCX"}
-          <input
-            type="file"
-            accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            hidden
-            disabled={disabled || busy}
-            onChange={handleChange}
-          />
-        </label>
+        <button
+          type="button"
+          className="btn btn-ghost"
+          disabled={disabled || busy || !link.trim()}
+          onClick={handleUseTemplate}
+        >
+          {busy ? "Loading…" : template ? "Replace template" : "Use this template"}
+        </button>
         {template ? (
           <>
             <span className="muted">
@@ -73,7 +85,7 @@ export default function TemplateUpload({ template, onUploaded, onRemoved, disabl
             </button>
           </>
         ) : (
-          <span className="muted">No template uploaded yet</span>
+          <span className="muted">No template loaded yet</span>
         )}
       </div>
 

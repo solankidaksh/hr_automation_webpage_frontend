@@ -80,6 +80,11 @@ export const api = {
     form.append("file", file);
     return request("/api/templates/upload", { method: "POST", body: form });
   },
+  fromDriveTemplate: (file) =>
+    request("/api/templates/from-drive", {
+      method: "POST",
+      body: JSON.stringify({ file }),
+    }),
   latestTemplate: () => request("/api/templates/latest"),
   deleteTemplate: (templateId) =>
     request(`/api/templates/${templateId}`, { method: "DELETE" }),
