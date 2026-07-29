@@ -87,7 +87,7 @@ export default function GenerateButton({
         </p>
       ) : (
         <p className="muted" style={{ marginTop: "-0.25rem", marginBottom: "0.9rem" }}>
-          Example: <strong>E001_Daksh_Renewal Letter.pdf</strong> when field 1 is Code,
+          Example: <strong>E001_Daksh_Solanki_Renewal Letter.pdf</strong> when field 1 is Code,
           field 2 is Name, and title is “Renewal Letter”.
         </p>
       )}
