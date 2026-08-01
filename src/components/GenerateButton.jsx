@@ -14,10 +14,14 @@ export default function GenerateButton({
   onNameField2Change,
   onNameSuffixChange,
 }) {
-  const previewLabel =
-    nameField1 && nameField2 && nameSuffix.trim()
-      ? `{${nameField1}}_{${nameField2}}_${nameSuffix.trim()}.pdf`
-      : null;
+  const previewParts = [
+    nameField1 ? `{${nameField1}}` : null,
+    nameField2 ? `{${nameField2}}` : null,
+    nameSuffix.trim() || null,
+  ].filter(Boolean);
+  const previewLabel = previewParts.length
+    ? `${previewParts.join("_")}.pdf`
+    : null;
 
   return (
     <section className="section">
@@ -87,8 +91,9 @@ export default function GenerateButton({
         </p>
       ) : (
         <p className="muted" style={{ marginTop: "-0.25rem", marginBottom: "0.9rem" }}>
-          Example: <strong>E001_Daksh_Solanki_Renewal Letter.pdf</strong> when field 1 is Code,
-          field 2 is Name, and title is “Renewal Letter”.
+          Fill at least one field. Example:{" "}
+          <strong>E001_Daksh_Solanki_Renewal Letter.pdf</strong> when field 1 is Code, field 2 is
+          Name, and title is “Renewal Letter”.
         </p>
       )}
 

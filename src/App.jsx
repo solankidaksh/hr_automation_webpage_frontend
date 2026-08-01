@@ -134,15 +134,16 @@ export default function App() {
 
   const sheetHeaders = preview?.headers || validation?.headers || [];
 
+  const hasPdfNamePart =
+    Boolean(nameField1) || Boolean(nameField2) || Boolean(nameSuffix.trim());
+
   const canGenerate =
     Boolean(user) &&
     Boolean(template) &&
     Boolean(sheet.trim()) &&
     Boolean(validation?.ok) &&
     Boolean(folderPreview?.folder_id) &&
-    Boolean(nameField1) &&
-    Boolean(nameField2) &&
-    Boolean(nameSuffix.trim()) &&
+    hasPdfNamePart &&
     !(preview && preview.row_count > 1000);
 
   let disabledReason = "";
@@ -152,8 +153,8 @@ export default function App() {
   else if (!validation.ok) disabledReason = "Fix missing columns, then validate again.";
   else if (!folderPreview?.folder_id) {
     disabledReason = "Paste a Drive folder link and click Verify folder.";
-  } else if (!nameField1 || !nameField2 || !nameSuffix.trim()) {
-    disabledReason = "Choose two sheet columns and enter a letter title for PDF names.";
+  } else if (!hasPdfNamePart) {
+    disabledReason = "Fill at least one PDF name field (column or letter title).";
   } else if (preview && preview.row_count > 1000) {
     disabledReason = `This sheet has ${preview.row_count} rows. Max 1000 letters per generate. Split the sheet and try again.`;
   }
