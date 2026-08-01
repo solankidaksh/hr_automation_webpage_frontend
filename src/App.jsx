@@ -21,6 +21,7 @@ export default function App() {
   const [nameField2, setNameField2] = useState("");
   const [nameSuffix, setNameSuffix] = useState("");
   const [starting, setStarting] = useState(false);
+  const [stopping, setStopping] = useState(false);
   const [job, setJob] = useState(null);
   const [jobError, setJobError] = useState("");
   const [authError, setAuthError] = useState("");
@@ -82,14 +83,20 @@ export default function App() {
       try {
         const status = await api.jobStatus(jobId);
         setJob(status);
-        if (status.status === "completed" || status.status === "failed") {
+        if (
+          status.status === "completed" ||
+          status.status === "failed" ||
+          status.status === "cancelled"
+        ) {
           clearInterval(pollRef.current);
           pollRef.current = null;
+          setStopping(false);
         }
       } catch (err) {
         setJobError(err.message || "Failed to fetch job status");
         clearInterval(pollRef.current);
         pollRef.current = null;
+        setStopping(false);
       }
     };
 
@@ -99,6 +106,7 @@ export default function App() {
 
   async function handleGenerate() {
     setStarting(true);
+    setStopping(false);
     setJobError("");
     try {
       const started = await api.generate({
@@ -132,7 +140,29 @@ export default function App() {
     }
   }
 
+  async function handleStop() {
+    if (!job?.job_id) return;
+    setStopping(true);
+    setJobError("");
+    try {
+      const result = await api.cancelJob(job.job_id);
+      setJob((prev) =>
+        prev
+          ? {
+              ...prev,
+              message: result.message || "Stopping after current letter…",
+              progress_text: result.message || "Stopping after current letter…",
+            }
+          : prev
+      );
+    } catch (err) {
+      setJobError(err.message || "Could not stop generation");
+      setStopping(false);
+    }
+  }
+
   const sheetHeaders = preview?.headers || validation?.headers || [];
+  const jobBusy = job?.status === "queued" || job?.status === "running";
 
   const hasPdfNamePart =
     Boolean(nameField1) || Boolean(nameField2) || Boolean(nameSuffix.trim());
@@ -226,10 +256,13 @@ export default function App() {
 
           <GenerateButton
             disabled={!canGenerate}
-            busy={starting || job?.status === "queued" || job?.status === "running"}
+            busy={starting || jobBusy}
+            canStop={jobBusy}
+            stopping={stopping}
             skipIfExists={skipIfExists}
             onSkipChange={setSkipIfExists}
             onGenerate={handleGenerate}
+            onStop={handleStop}
             disabledReason={disabledReason}
             driveFolderName={folderPreview?.name}
             headers={sheetHeaders}

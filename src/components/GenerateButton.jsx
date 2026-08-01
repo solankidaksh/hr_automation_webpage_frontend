@@ -1,9 +1,12 @@
 export default function GenerateButton({
   disabled,
   busy,
+  canStop = false,
+  stopping = false,
   skipIfExists,
   onSkipChange,
   onGenerate,
+  onStop,
   disabledReason,
   driveFolderName,
   headers = [],
@@ -107,7 +110,7 @@ export default function GenerateButton({
         Skip rows that already have a PDF link
       </label>
 
-      <div style={{ marginTop: "1rem" }}>
+      <div className="generate-actions">
         <button
           type="button"
           className="btn btn-primary"
@@ -116,7 +119,23 @@ export default function GenerateButton({
         >
           {busy ? "Working…" : "Generate Letters"}
         </button>
+        {canStop ? (
+          <button
+            type="button"
+            className="btn btn-stop"
+            disabled={stopping || !onStop}
+            onClick={onStop}
+          >
+            {stopping ? "Stopping…" : "Stop"}
+          </button>
+        ) : null}
       </div>
+
+      {canStop && stopping ? (
+        <p className="muted" style={{ marginTop: "0.75rem" }}>
+          Stop requested — finishing the current letter, then stopping.
+        </p>
+      ) : null}
 
       {disabled && disabledReason ? (
         <p className="muted" style={{ marginTop: "0.75rem" }}>

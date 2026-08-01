@@ -100,4 +100,6 @@ export const api = {
   generate: (body) =>
     request("/api/jobs/generate", { method: "POST", body: JSON.stringify(body) }),
   jobStatus: (jobId) => request(`/api/jobs/status/${encodeURIComponent(jobId)}`),
+  cancelJob: (jobId) =>
+    request(`/api/jobs/cancel/${encodeURIComponent(jobId)}`, { method: "POST" }),
 };

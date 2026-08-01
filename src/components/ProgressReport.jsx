@@ -25,7 +25,9 @@ export default function ProgressReport({ job, error }) {
         ? 100
         : 0;
   const running = job && (job.status === "queued" || job.status === "running");
-  const done = job && (job.status === "completed" || job.status === "failed");
+  const done =
+    job &&
+    (job.status === "completed" || job.status === "failed" || job.status === "cancelled");
 
   return (
     <section className="section">
@@ -45,6 +47,15 @@ export default function ProgressReport({ job, error }) {
               Finished — {job.succeeded} generated
               {job.skipped ? `, ${job.skipped} skipped` : ""}
               {job.failed ? `, ${job.failed} failed` : ""}.
+            </div>
+          ) : null}
+
+          {done && job.status === "cancelled" ? (
+            <div className="alert alert-warn">
+              Stopped — {job.succeeded} generated
+              {job.skipped ? `, ${job.skipped} skipped` : ""}
+              {job.failed ? `, ${job.failed} failed` : ""}. Already finished letters stay in
+              Drive and the sheet.
             </div>
           ) : null}
 
