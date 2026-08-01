@@ -177,7 +177,7 @@ export default function App() {
     !(preview && preview.row_count > 1000);
 
   let disabledReason = "";
-  if (!template) disabledReason = "Paste a Drive/Docs template link and click Use this template.";
+  if (!template) disabledReason = "Add a template via Drive/Docs link or .docx upload.";
   else if (!sheet.trim()) disabledReason = "Paste a Google Sheet URL or ID.";
   else if (!validation) disabledReason = "Click Preview & validate before generating.";
   else if (!validation.ok) disabledReason = "Fix missing columns, then validate again.";

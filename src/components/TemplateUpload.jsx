@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { api } from "../api/client";
 
 export default function TemplateUpload({ template, onUploaded, onRemoved, disabled }) {
   const [link, setLink] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const fileInputRef = useRef(null);
 
   async function handleUseTemplate() {
     if (!link.trim()) {
@@ -17,10 +18,35 @@ export default function TemplateUpload({ template, onUploaded, onRemoved, disabl
     try {
       const loaded = await api.fromDriveTemplate(link.trim());
       onUploaded(loaded);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (err) {
       setError(err.message || "Could not load template from Drive");
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function handleFileChange(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith(".docx")) {
+      setError("Only .docx Word templates are supported");
+      e.target.value = "";
+      return;
+    }
+
+    setBusy(true);
+    setError("");
+    try {
+      const loaded = await api.uploadTemplate(file);
+      onUploaded(loaded);
+      setLink("");
+    } catch (err) {
+      setError(err.message || "Could not upload template");
+    } finally {
+      setBusy(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   }
 
@@ -33,6 +59,8 @@ export default function TemplateUpload({ template, onUploaded, onRemoved, disabl
     try {
       await api.deleteTemplate(template.id);
       onRemoved?.();
+      setLink("");
+      if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (err) {
       setError(err.message || "Could not remove template");
     } finally {
@@ -44,9 +72,9 @@ export default function TemplateUpload({ template, onUploaded, onRemoved, disabl
     <section className="section">
       <h2>Letter template</h2>
       <p className="lede">
-        Paste a Google Drive <strong>.docx</strong> or <strong>Google Docs</strong> link with
-        placeholders like {"{{name}}"}, {"{{department}}"}, {"{{emp_no}}"}. Use one word only
-        inside the braces (underscores OK) — not {"{{emp no}}"}.
+        Add a Word template with placeholders like {"{{name}}"}, {"{{department}}"},{" "}
+        {"{{emp_no}}"}. Use a Drive/Docs link or upload a <strong>.docx</strong> file. Use one
+        word only inside the braces (underscores OK) — not {"{{emp no}}"}.
       </p>
 
       <div className="field">
@@ -68,12 +96,27 @@ export default function TemplateUpload({ template, onUploaded, onRemoved, disabl
           disabled={disabled || busy || !link.trim()}
           onClick={handleUseTemplate}
         >
-          {busy ? "Loading…" : template ? "Replace template" : "Use this template"}
+          {busy ? "Loading…" : template ? "Replace from link" : "Use this template"}
         </button>
+      </div>
+
+      <div className="field" style={{ marginTop: "1rem" }}>
+        <label htmlFor="template-file">Or upload a .docx file</label>
+        <input
+          id="template-file"
+          ref={fileInputRef}
+          type="file"
+          accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          disabled={disabled || busy}
+          onChange={handleFileChange}
+        />
+      </div>
+
+      <div className="file-row">
         {template ? (
           <>
             <span className="muted">
-              {template.original_filename} (#{template.id})
+              Loaded: {template.original_filename} (#{template.id})
             </span>
             <button
               type="button"

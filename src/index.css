@@ -296,6 +296,21 @@ a {
   outline: none;
 }
 
+.field input[type="file"] {
+  width: 100%;
+  border: 1px dashed var(--line);
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 0.35rem;
+  padding: 0.75rem 0.9rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.field input[type="file"]:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .field input:focus,
 .field select:focus {
   border-color: var(--teal);
